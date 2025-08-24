@@ -11,6 +11,7 @@ Key features include:
 - DTO-based API responses for clean and safe data transfer.
 - Global exception handling with meaningful HTTP status codes.
 
+<br><br>
 
 ## Technologies & Tools
 
@@ -20,6 +21,7 @@ Key features include:
 **Web Development:** REST API  
 **Other Tools & Technologies:** Git, Maven  
 
+<br><br>
 
 ## Features
 
