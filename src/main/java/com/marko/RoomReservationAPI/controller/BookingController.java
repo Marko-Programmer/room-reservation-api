@@ -61,14 +61,6 @@ public BookingController(BookingService bookingService) {
 
 
 
-//    2. Whitelist для сортування:
-
-//    Set<String> allowed = Set.of("id","name","capacity","location");
-//    if (!allowed.contains(sortBy)) throw new BadRequestException("Invalid sortBy");
-
-
-
-
 
 
 }
