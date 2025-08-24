@@ -48,7 +48,7 @@ Key features include:
 | PUT     | `/bookings/{id}/cancel`     | Cancel a booking                              |                                                                    |
 | GET     | `/bookings/{id}/availability` | Check room availability for a period         | `startTime`, `endTime`                                            |
 
----
+
 
 ## Architecture & Design
 - **DTOs (RoomDTO, BookingDTO):** Ensure clean API responses without exposing internal models.  
