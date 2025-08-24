@@ -34,6 +34,7 @@ Key features include:
 - Check room availability for a given time period.
 - Transactional operations with **Serializable isolation** to prevent concurrency issues.
 
+<br><br>
 
 ## API Endpoints
 
@@ -48,7 +49,7 @@ Key features include:
 | PUT     | `/bookings/{id}/cancel`     | Cancel a booking                              |                                                                    |
 | GET     | `/bookings/{id}/availability` | Check room availability for a period         | `startTime`, `endTime`                                            |
 
-
+<br><br>
 
 ## Architecture & Design
 - **DTOs (RoomDTO, BookingDTO):** Ensure clean API responses without exposing internal models.  
@@ -57,7 +58,7 @@ Key features include:
 - **Repository Layer:** Spring Data JPA repositories with custom queries for filtering and checking overlaps.  
 - **Concurrency Control:** Serializable transactions for safe booking creation and cancellation.  
 
-
+<br><br>
 
 ## Example Usage
 1. Get available rooms with pagination and filtering:  
@@ -79,6 +80,7 @@ POST /bookings
 4. Cancel a booking:
 PUT /bookings/5/cancel
 
+<br><br>
 
 # Why This Project Stands Out
 
