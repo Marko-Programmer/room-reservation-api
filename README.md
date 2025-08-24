@@ -11,7 +11,6 @@ Key features include:
 - DTO-based API responses for clean and safe data transfer.
 - Global exception handling with meaningful HTTP status codes.
 
----
 
 ## Technologies & Tools
 
@@ -21,7 +20,6 @@ Key features include:
 **Web Development:** REST API  
 **Other Tools & Technologies:** Git, Maven  
 
----
 
 ## Features
 
@@ -36,7 +34,6 @@ Key features include:
 - Check room availability for a given time period.
 - Transactional operations with **Serializable isolation** to prevent concurrency issues.
 
----
 
 ## API Endpoints
 
@@ -60,7 +57,7 @@ Key features include:
 - **Repository Layer:** Spring Data JPA repositories with custom queries for filtering and checking overlaps.  
 - **Concurrency Control:** Serializable transactions for safe booking creation and cancellation.  
 
----
+
 
 ## Example Usage
 1. Get available rooms with pagination and filtering:  
