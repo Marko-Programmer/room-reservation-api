@@ -1,128 +1,102 @@
-# Технічне завдання (ТЗ): Система бронювання кімнат
+# Room Reservation System — Technical Specification (TS)
+
+## Overview
+
+This system allows users to view rooms, book them, and manage their bookings. Administrators can manage both rooms and bookings.
 
 ---
 
-## Загальний опис:
+## Core Entities
 
-Система дозволяє користувачам переглядати кімнати, бронювати їх, переглядати свої бронювання,
-а адміністраторам — керувати кімнатами та бронюваннями.
+### 1. **Room**
 
----
+* `id` (Long, unique identifier)
+* `name` (String) — room name
+* `capacity` (int) — maximum number of people
+* `location` (String) — e.g., floor or building
+* `available` (Boolean) — indicates if the room is available for booking
 
-## Основні сутності:
-
-### 1. **Room** (Кімната)
-
-* `id` (Long, унікальний ідентифікатор)
-* `name` (String) — назва кімнати
-* `capacity` (int) — кількість людей, що може вмістити кімната
-* `location` (String) — розташування кімнати (поверх, будівля)
-* `available` (Boolean) — чи доступна кімната для бронювання
-
----
-
-### 2. **Booking** (Бронювання)
+### 2. **Booking**
 
 * `id` (Long)
-* `room` (Room) — зв’язок до кімнати
-* `user` (String) — ім’я користувача, який бронює
-* `startTime` (LocalDateTime) — початок бронювання
-* `endTime` (LocalDateTime) — кінець бронювання
-* `status` (Enum: CONFIRMED, CANCELLED) — статус бронювання
+* `room` (Room) — linked room
+* `user` (String) — user name who booked
+* `startTime` (LocalDateTime) — start time of booking
+* `endTime` (LocalDateTime) — end time of booking
+* `status` (Enum: CONFIRMED, CANCELLED)
 
 ---
 
-## Функціональні вимоги:
+## Functional Requirements
 
-### 1. CRUD для кімнат (Room)
+### 1. Room CRUD
 
-* Створення, редагування, видалення кімнат
+* Create, update, delete rooms
+* Search/filter rooms:
 
-* Пошук кімнат за параметрами:
-  * фільтрація за доступністю (`available`)
-  * фільтрація за локацією
-  * пошук за назвою (частковий збіг)
+  * by availability (`available`)
+  * by location
+  * by name (partial match)
+* Pagination and sorting by `name`, `capacity`, `location`
 
-* Пагінація та сортування кімнат за назвою, місткістю, локацією
+### 2. Booking Management
 
----
+* Create a booking (if room is available and no time overlap exists)
+* View user bookings with pagination
+* Cancel a booking
+* Check room availability for a given period
+* Update booking status (CONFIRMED, CANCELLED)
 
-### 2. Бронювання (Booking)
+### 3. Transactions & Isolation
 
-* Створення нового бронювання (при умові, що кімната доступна і на вказаний час немає перетину з іншими бронюваннями)
-* Перегляд бронювань користувача з пагінацією
-* Скасування бронювання
-* Перевірка доступності кімнати на заданий період (неперетин з іншими бронюваннями)
-* Зміна статусу бронювання (CONFIRMED, CANCELLED)
+* Booking creation must be transactional: check availability + save booking
+* Use appropriate isolation level to avoid concurrency issues (e.g., phantom reads)
+* Cancellation should also be transactional
 
----
+### 4. REST API Examples
 
-### 3. Транзакції і рівні ізоляції
+| Method | Path                          | Description                            | Params / Body                                                      |
+| ------ | ----------------------------- | -------------------------------------- | ------------------------------------------------------------------ |
+| GET    | `/rooms`                      | Get list of rooms (paginated & sorted) | `page`, `size`, `sortBy`, `order`, `available`, `location`, `name` |
+| POST   | `/rooms`                      | Create a room                          | JSON Room                                                          |
+| PUT    | `/rooms/{id}`                 | Update a room                          | JSON Room                                                          |
+| DELETE | `/rooms/{id}`                 | Delete a room                          | -                                                                  |
+| GET    | `/bookings`                   | Get user bookings                      | `user`, `page`, `size`                                             |
+| POST   | `/bookings`                   | Create a booking                       | JSON Booking (`roomId`, `user`, `startTime`, `endTime`)            |
+| PUT    | `/bookings/{id}/cancel`       | Cancel a booking                       | -                                                                  |
+| GET    | `/bookings/{id}/availability` | Check room availability                | `startTime`, `endTime`                                             |
 
-* Операція створення бронювання повинна бути **транзакційною**: перевірка доступності + збереження бронювання
-* Використовуй відповідний рівень ізоляції, щоб уникнути проблем конкурентності (наприклад, phantom read —
-коли дві транзакції одночасно намагаються забронювати кімнату на один і той же час)
-* При скасуванні бронювання також використовувати транзакцію
+### 5. DTOs
 
----
+* Return DTOs instead of entities to avoid exposing unnecessary data:
 
-### 4. REST API — приклади ендпоінтів:
+  * `RoomDTO`: `id`, `name`, `capacity`, `location`, `available`
+  * `BookingDTO`: `id`, `roomName`, `user`, `startTime`, `endTime`, `status`
 
-| Метод  | Шлях                       | Опис                                              | Параметри/тіло                                                     |
-| ------ | -------------------------- | ------------------------------------------------- | ------------------------------------------------------------------ |
-| GET    | `/rooms`                   | Отримати список кімнат з пагінацією і сортуванням | `page`, `size`, `sortBy`, `order`, `available`, `location`, `name` |
-| POST   | `/rooms`                   | Створити кімнату                                  | JSON Room                                                          |
-| PUT    | `/rooms/{id}`              | Оновити кімнату                                   | JSON Room                                                          |
-| DELETE | `/rooms/{id}`              | Видалити кімнату                                  |                                                                    |
-| GET    | `/bookings`                | Отримати бронювання користувача з пагінацією      | `user`, `page`, `size`                                             |
-| POST   | `/bookings`                | Створити бронювання                               | JSON Booking (roomId, user, startTime, endTime)                    |
-| PUT    | `/bookings/{id}/cancel`    | Скасувати бронювання                              |                                                                    |
-| GET    | `/bookings/{id}/availability` | Перевірити доступність кімнати на період          | `startTime`, `endTime`                                             |
+### 6. Validation
 
----
-
-### 5. DTO:
-
-* Для повернення кімнат та бронювань зроби DTO (наприклад, RoomDTO, BookingDTO) — щоб не повертати зайві дані.
-* Наприклад, для RoomDTO можна показувати тільки `id`, `name`, `capacity`, `location`, `available`.
-* Для BookingDTO — `id`, `roomName`, `user`, `startTime`, `endTime`, `status`.
+* Start time < end time
+* Cannot book unavailable or already booked rooms
+* Validate request body in controllers (`@Valid`, field constraints)
 
 ---
 
-### 6. Валідація:
+## Technical Notes
 
-* Перевірка коректності часу (startTime < endTime)
-* Неможливість бронювати кімнату, яка недоступна або зайнята в цей час
-* Валідація вхідних параметрів в контролері
-
----
-
-
-## Технічні деталі і рекомендації:
-
-* Використовуй Spring Data JPA, JpaRepository для репозиторіїв
-* Використовуй `@Query` для складних запитів (перевірка доступності, пошук)
-* Пагінація та сортування через Pageable
-* Транзакції через `@Transactional` і рівні ізоляції для операцій бронювання
-* Формуй REST API у контролерах з відповідними методами HTTP
-* Використовуй DTO для передачі даних з сервісу в контролер
-* Валідація через Hibernate Validator (`@Valid`, `@NotNull`, кастомні перевірки)
+* Spring Data JPA with `JpaRepository`
+* Use `@Query` for complex queries (availability check, search)
+* Pagination & sorting via `Pageable`
+* Transactions via `@Transactional`
+* Use DTOs to return data from services to controllers
+* Validation with Hibernate Validator (`@Valid`, `@NotNull`, custom checks)
 
 ---
 
-## Приклад роботи:
+## Example Workflow
 
-1. Користувач робить GET `/rooms?page=0&size=5&sortBy=capacity&order=asc&available=true&location=1st Floor`
-— отримує список кімнат.
-
-2. Користувач вибирає кімнату, перевіряє її доступність
- на час через GET `/rooms/{id}/availability?startTime=2025-08-01T10:00&endTime=2025-08-01T12:00`
-
-3. Якщо доступна — створює бронювання POST `/bookings` з телом:
- `{ "roomId": 12, "user": "Marko", "startTime": "...", "endTime": "..." }`
-
-4. Бронювання зберігається транзакційно, виконується перевірка перекриття з іншими бронюваннями
-5. Користувач переглядає свої бронювання GET `/bookings?user=Marko&page=0&size=5`
-6. Може скасувати бронювання PUT `/bookings/{id}/cancel`
-
- 
+1. GET `/rooms?page=0&size=5&sortBy=capacity&order=asc&available=true&location=1st Floor` → list of rooms
+2. GET `/rooms/{id}/availability?startTime=2025-08-01T10:00&endTime=2025-08-01T12:00` → check availability
+3. POST `/bookings` `{ "roomId": 12, "user": "Marko", "startTime": "...", "endTime": "..." }` → create booking
+4. Transactional booking creation checks for overlap
+5. GET `/bookings?user=Marko&page=0&size=5` → view user bookings
+6. PUT `/bookings/{id}/cancel` → cancel booking
